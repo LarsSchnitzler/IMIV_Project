@@ -54,16 +54,47 @@ curl_close($ch);
 
 $data = json_decode($result, true); // Convert JSON to PHP Array, although php array can be indexed by strings
 
-// get the time array from the data array
-$time = $data['hourly']['time'];
+$units = $data['hourly_units']; // units of the weather variables
 
-// take the array apart into its weather variables. then printing them out
+$time = $data['hourly']['time']; // timestamps-array of the weather variables
+
+// take the data apart into its weather variables.
 $temperature_2m = $data['hourly']['temperature_2m'];
 $precipitation = $data['hourly']['precipitation'];
 $surface_pressure = $data['hourly']['surface_pressure'];
 $wind_speed_10m = $data['hourly']['wind_speed_10m'];
 $cloud_cover = $data['hourly']['cloud_cover'];
 $lightning_potential = $data['hourly']['lightning_potential'];
+
+//-------------Update units in Database-------------
+try {
+    // Check if units table is empty
+    $stmt = $conn->prepare("SELECT COUNT(*) FROM units");
+    $stmt->execute();
+    $count = $stmt->fetchColumn();
+
+    if ($count == 0) {
+        // If units table is empty, insert new entries
+        $stmt = $conn->prepare("INSERT INTO units (physical_quantity, unit) VALUES (:physical_quantity, :unit)");
+        foreach ($units as $physical_quantity => $unit) { //The arrow syntax (=>) in PHP's foreach loop is used to assign the current element's key to one variable and the current element's value to another variable.
+            $stmt->bindParam(':physical_quantity', $physical_quantity);
+            $stmt->bindParam(':unit', $unit);
+            $stmt->execute();
+        }
+        echo "Units inserted successfully\n";
+    } else {
+        // If units table is not empty, update entries
+        $stmt = $conn->prepare("UPDATE units SET unit = :unit WHERE physical_quantity = :physical_quantity AND unit != :unit");
+        foreach ($units as $physical_quantity => $unit) {
+            $stmt->bindParam(':physical_quantity', $physical_quantity);
+            $stmt->bindParam(':unit', $unit);
+            $stmt->execute();
+        }
+        echo "Units updated successfully\n";
+    }
+} catch(PDOException $e) {
+    echo "Error: " . $e->getMessage() . "\n";
+}
 
 //-------------Insert hourly Weather States of current day into Database-------------
 try {
@@ -103,4 +134,5 @@ echo "Connection closed\n";
 
 //-------------end log message-------------
 echo "-----------End of script-----------\n";
-?>
+
+?> 
