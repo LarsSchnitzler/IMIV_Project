@@ -9,7 +9,14 @@ $dbname = "512430_4_1";
 $result_weather;
 $result_units;
 
-$data = array();
+$data = array(); //will be the output array
+
+//-------------Functions-------------
+function convertTime_backTo_withT($time) {
+    $date = substr($time, 0, 10); //substr takes startindex and length
+    $time = substr($time, 11, 5);
+    return $date . "T" . $time . ":00";
+}
 
 //Set the header  
 header("Content-Type: application/json");
@@ -52,6 +59,9 @@ if ($result_units->rowCount() > 0) {
 //Set weather data
 if ($result_weather->rowCount() > 0) {
     $data['weather'] = $result_weather->fetchAll(PDO::FETCH_ASSOC);
+    foreach ($data['weather'] as $key => $value) {
+        $data['weather'][$key]['date_time'] = convertTime_backTo_withT($value['date_time']);
+    }
 }
 
 echo json_encode($data);
