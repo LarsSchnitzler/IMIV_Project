@@ -18,15 +18,13 @@ if (file_exists($lastExecFile)) {
 
 file_put_contents($lastExecFile, time());
 
-//-------------log-messages-------------
+//-------------get log file-------------
 $logFile = '../private/api_to_db_logfile.log';
 
 $message = "-----------Start of script-----------\n";
 $message .= "Today is: " . date("Y-m-d H:i:s") . "\n";
-file_put_contents($logFile, $message, FILE_APPEND);
 
-/* //-------------set html header to json
-header('Content-Type: application/json'); */
+file_put_contents($logFile, $message, FILE_APPEND);
 
 //------------------Variables------------------
 $servername = "localhost";
@@ -35,13 +33,6 @@ $password = "PETQsVWrx@J0";
 $dbname = "512430_4_1";
 
 //----------------Functions----------------
-
-//function that takes the api array of the form: "year-month-dayThour:minute" and returns datetime-string in the form: "year-month-day hour:minute:second"
-function convertTime($time) {
-    $date = substr($time, 0, 10); //substr takes startindex and length
-    $time = substr($time, 11, 5);
-    return $date . " " . $time . ":00";
-}
 
 //-------------Database Connection-------------
 try {

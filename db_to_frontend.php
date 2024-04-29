@@ -1,24 +1,26 @@
 <?php
-// Database connection variables
-$servername = "localhost";
-$username = "512430_4_1";
-$password = "PETQsVWrx@J0";
-$dbname = "512430_4_1";
+require_once 'config.php';
 
+//-------------------------------Database Connection-------------------------------
 try {
-    // Create a new PDO instance
-    $conn = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
-    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $conn = new PDO($dsn, $username, $password, $options);   
+} catch (PDOException $e) {
+    echo json_encode(['error' => $e->getMessage()]);
+}
 
-    // Prepare and execute the SQL statement
+//----------------Select all Weather States and Units from Database-----------------
+try {
+    // Prepare and execute the weatehr-SQL statement
     $stmt = $conn->prepare("SELECT * FROM weather_states");
     $stmt->execute();
     $weather_states = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // Prepare and execute the SQL statement
+    // Prepare and execute the units-SQL statement
     $stmt = $conn->prepare("SELECT * FROM units");
     $stmt->execute();
-    $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $units = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    //make new assoc. array with the physical quantity-value as key and the unit-value as value.-Out of $units
+    $units = array_column($units, 'unit', 'physical_quantity');
 
     $output = array(
         "weather_states" => $weather_states,
@@ -30,7 +32,7 @@ try {
 
     echo json_encode($output);
 } catch(PDOException $e) {
-    echo "Error: " . $e->getMessage();
+    echo json_encode(["error: " . $e->getMessage()]);
 }
 
 // Close the database connection
