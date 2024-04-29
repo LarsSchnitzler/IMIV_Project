@@ -1,14 +1,32 @@
 <?php
-//-------------start log message-------------
+//----check wether file has been executed in the last 23h----
+$lastExecFile = '../private/last_execution.txt';
 
-use function PHPSTORM_META\type;
+if (file_exists($lastExecFile)) {
+    $lastExec = strtotime(file_get_contents($lastExecFile));
+    
+    if (!isset($lastExec) || empty($lastExec)) {
+        $lastExec = time();
+    }
 
-echo "-----------Start of script-----------\n";
-$today = date("Y-m-d H:i:s");
-echo "Today is: " . $today . "\n";
+    $elapsed = time() - $lastExec;
 
-//-------------set html header to json
-header('Content-Type: application/json');
+    if ($elapsed < 23 * 60 * 60) {
+        die("The script has already run within the last 23 hours.\n");
+    }
+}
+
+file_put_contents($lastExecFile, time());
+
+//-------------log-messages-------------
+$logFile = '../private/api_to_db_logfile.log';
+
+$message = "-----------Start of script-----------\n";
+$message .= "Today is: " . date("Y-m-d H:i:s") . "\n";
+file_put_contents($logFile, $message, FILE_APPEND);
+
+/* //-------------set html header to json
+header('Content-Type: application/json'); */
 
 //------------------Variables------------------
 $servername = "localhost";
@@ -29,9 +47,9 @@ function convertTime($time) {
 try {
     $conn = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
     $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    echo "Database connection successful\n";            
+    file_put_contents($logFile, "Database connection successful\n", FILE_APPEND);        
 } catch (Exception $e) {
-    echo "Database connection failed: " . $e->getMessage() . "\n";
+    file_put_contents($logFile, "Database connection failed: " . $e->getMessage() . "\n", FILE_APPEND);
 }
 
 //----------------------------API Request--------------------------------
@@ -43,13 +61,13 @@ curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 
 $result = curl_exec($ch);
 
-// echoing the HTTP response code
+// logging the HTTP response code
 $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-echo 'API - HTTP response code: ' . $httpcode . "\n";
+file_put_contents($logFile, 'API - HTTP response code: ' . $httpcode . "\n", FILE_APPEND);
 
-// echoing the error message
+// logging the error message
 if (curl_errno($ch)) {
-    echo 'Error:' . curl_error($ch) . "\n";
+    file_put_contents($logFile, 'Error:' . curl_error($ch) . "\n", FILE_APPEND);
 }
 
 curl_close($ch);
@@ -80,17 +98,6 @@ try {
         $cloudcover = $hour['cloudcover'];
         $solarenergy = $hour['solarenergy'];
 
-/*         echo "datetimeEpoch: " . gettype($datetimeEpoch) . "\n";
-        echo "temp: " . gettype($temp) . "\n";
-        echo "humidity: " . gettype($humidity) . "\n";
-        echo "precip: " . gettype($precip) . "\n";
-        echo "pressure: " . gettype($pressure) . "\n";
-        echo "windspeed: " . gettype($windspeed) . "\n";
-        echo "visibility: " . gettype($visibility) . "\n";
-        echo "cloudcover: " . gettype($cloudcover) . "\n";
-        echo "solarenergy: " . gettype($solarenergy) . "\n";
-        echo "sunrise: " . gettype($sunrise) . "\n"; */
-
         //Insert hourly Weather Variables of current day into one new entry in Database
         $stmt = $conn->prepare("INSERT INTO weather_states (datetimeEpoch, temp, humidity, precip, pressure, windspeed, visibility, cloudcover, solarenergy, sunrise) VALUES (:datetimeEpoch, :temp, :humidity, :precip, :pressure, :windspeed, :visibility, :cloudcover, :solarenergy, :sunrise)");
         $stmt->bindParam(':datetimeEpoch', $datetimeEpoch);
@@ -106,7 +113,7 @@ try {
         $stmt->bindParam(':sunrise', $sunrise);
 
         $stmt->execute();
-        echo "New entry with datetimeEpoch: " .$datetimeEpoch . " created successfully\n";
+        file_put_contents($logFile, 'Error:' . curl_error($ch) . "\n", FILE_APPEND);
     }
 
     // Commit the transaction
@@ -114,24 +121,24 @@ try {
 } catch(PDOException $e) {
     // Roll back the transaction if something failed
     $conn->rollBack();
-    echo "Error: " . $e->getMessage() . "\n";
+    file_put_contents($logFile, "Error: " . $e->getMessage() . "\n", FILE_APPEND);
 }
 
 //-------------Delete all weather states older than a month-------------
 try {
     $stmt = $conn->prepare("DELETE FROM weather_states WHERE FROM_UNIXTIME(datetimeEpoch) < DATE_SUB(NOW(), INTERVAL 1 MONTH)");
     $stmt->execute();
-    echo "Old entries deleted successfully\n";
+    file_put_contents($logFile, "Older weather states deleted\n", FILE_APPEND);
 } catch(PDOException $e) {
-    echo "Error: " . $e->getMessage() . "\n";
+    file_put_contents($logFile, "Error: " . $e->getMessage() . "\n", FILE_APPEND);
 }
 
 //-------------Database Connection Close-------------
 $conn = null;
 
-echo "Connection closed\n";
+file_put_contents($logFile, "Database connection closed\n", FILE_APPEND);
 
 //-------------end log message-------------
-echo "-----------End of script-----------\n";
+file_put_contents($logFile, "-----------End of script-----------\n", FILE_APPEND);
 
 ?> 

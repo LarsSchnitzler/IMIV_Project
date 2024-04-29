@@ -13,15 +13,22 @@ try {
     // Prepare and execute the SQL statement
     $stmt = $conn->prepare("SELECT * FROM weather_states");
     $stmt->execute();
+    $weather_states = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // Fetch all rows as an associative array
+    // Prepare and execute the SQL statement
+    $stmt = $conn->prepare("SELECT * FROM units");
+    $stmt->execute();
     $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // Set the Content-Type header to application/json
+    $output = array(
+        "weather_states" => $weather_states,
+        "units" => $units
+    );
+
+    //------------------Output------------------
     header('Content-Type: application/json');
 
-    // Output the result as JSON
-    echo json_encode($result);
+    echo json_encode($output);
 } catch(PDOException $e) {
     echo "Error: " . $e->getMessage();
 }
