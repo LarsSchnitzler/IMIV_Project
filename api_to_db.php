@@ -1,8 +1,14 @@
 <?php
 //-------------start log message-------------
+
+use function PHPSTORM_META\type;
+
 echo "-----------Start of script-----------\n";
 $today = date("Y-m-d H:i:s");
 echo "Today is: " . $today . "\n";
+
+//-------------set html header to json
+header('Content-Type: application/json');
 
 //------------------Variables------------------
 $servername = "localhost";
@@ -28,101 +34,94 @@ try {
     echo "Database connection failed: " . $e->getMessage() . "\n";
 }
 
-$url = "https://api.open-meteo.com/v1/dwd-icon";
+//----------------------------API Request--------------------------------
+$url = 'https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/Chur%2C%20Switzerland/today?unitGroup=metric&elements=datetimeEpoch%2Ctemp%2Chumidity%2Cprecip%2Cwindspeed%2Cpressure%2Ccloudcover%2Cvisibility%2Csolarenergy%2Csunrise&include=hours%2Cdays&key=XCSJ35ABYDTZUGVYUJTZ23HDP&contentType=json';
 
-//------------------API Request----------------------
 $ch = curl_init();
-
-
 curl_setopt($ch, CURLOPT_URL, $url);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-curl_setopt($ch, CURLOPT_POST, 1);
-curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query([
-    'latitude' => 46.84805485136281,
-    'longitude' => 9.501732327669313,
-    'hourly' => 'temperature_2m,precipitation,surface_pressure,wind_speed_10m,cloud_cover,lightning_potential',
-    'forecast_days' => 1,
-]));
 
 $result = curl_exec($ch);
 
+// echoing the HTTP response code
+$httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+echo 'API - HTTP response code: ' . $httpcode . "\n";
+
+// echoing the error message
 if (curl_errno($ch)) {
-    echo 'Error:' . curl_error($ch);
+    echo 'Error:' . curl_error($ch) . "\n";
 }
 
 curl_close($ch);
 
+// reducing the response
 $data = json_decode($result, true); // Convert JSON to PHP Array, although php array can be indexed by strings
 
-$units = $data['hourly_units']; // units of the weather variables
+$sunrise = $data['days'][0]['sunrise']; // gets sunrise time for that day
+$dataHourly = $data['days'][0]['hours']; // reduces response to array of hourly states
 
-$time = $data['hourly']['time']; // timestamps-array of the weather variables
-
-// take the data apart into its weather variables.
-$temperature_2m = $data['hourly']['temperature_2m'];
-$precipitation = $data['hourly']['precipitation'];
-$surface_pressure = $data['hourly']['surface_pressure'];
-$wind_speed_10m = $data['hourly']['wind_speed_10m'];
-$cloud_cover = $data['hourly']['cloud_cover'];
-$lightning_potential = $data['hourly']['lightning_potential'];
-
-//-------------Update units in Database-------------
-try {
-    // Check if units table is empty
-    $stmt = $conn->prepare("SELECT COUNT(*) FROM units");
-    $stmt->execute();
-    $count = $stmt->fetchColumn();
-
-    if ($count == 0) {
-        // If units table is empty, insert new entries
-        $stmt = $conn->prepare("INSERT INTO units (physical_quantity, unit) VALUES (:physical_quantity, :unit)");
-        foreach ($units as $physical_quantity => $unit) { //The arrow syntax (=>) in PHP's foreach loop is used to assign the current element's key to one variable and the current element's value to another variable.
-            $stmt->bindParam(':physical_quantity', $physical_quantity);
-            $stmt->bindParam(':unit', $unit);
-            $stmt->execute();
-        }
-        echo "Units inserted successfully\n";
-    } else {
-        // If units table is not empty, update entries
-        $stmt = $conn->prepare("UPDATE units SET unit = :unit WHERE physical_quantity = :physical_quantity AND unit != :unit");
-        foreach ($units as $physical_quantity => $unit) {
-            $stmt->bindParam(':physical_quantity', $physical_quantity);
-            $stmt->bindParam(':unit', $unit);
-            $stmt->execute();
-        }
-        echo "Units updated successfully\n";
-    }
-} catch(PDOException $e) {
-    echo "Error: " . $e->getMessage() . "\n";
-}
+/* echo "sunrise: " . $sunrise . "\n";
+var_dump($dataHourly); */
 
 //-------------Insert hourly Weather States of current day into Database-------------
 try {
-    $stmt = $conn->prepare("INSERT INTO weather_states (date_time,temperature_2m, precipitation, surface_pressure, wind_speed_10m, cloud_cover, lightning_potential) VALUES (:date_time, :temperature_2m_hour, :precipitation_hour, :surface_pressure_hour, :wind_speed_10m_hour, :cloud_cover_hour, :lightning_potential_hour)");
+    // Start the transaction
+    $conn->beginTransaction();
 
-    for ($i = 0; $i < 24; $i++) {
-        // Bind parameters
-        $date_time = convertTime($time[$i]);
-        $stmt->bindParam(':date_time', $date_time);
-        $stmt->bindParam(':temperature_2m_hour', $temperature_2m[$i]);
-        $stmt->bindParam(':precipitation_hour', $precipitation[$i]);
-        $stmt->bindParam(':surface_pressure_hour', $surface_pressure[$i]);
-        $stmt->bindParam(':wind_speed_10m_hour', $wind_speed_10m[$i]);
-        $stmt->bindParam(':cloud_cover_hour', $cloud_cover[$i]);
-        $stmt->bindParam(':lightning_potential_hour', $lightning_potential[$i]);
-        // Execute the prepared statement
+    foreach ($dataHourly as $hour) {
+        //Extract hourly Weather Variables of current day
+        $datetimeEpoch = ($hour['datetimeEpoch']);
+        $temp = $hour['temp'];
+        $humidity = $hour['humidity'];
+        $precip = $hour['precip'];
+        $pressure = $hour['pressure'];
+        $windspeed = $hour['windspeed'];
+        $visibility = $hour['visibility'];
+        $cloudcover = $hour['cloudcover'];
+        $solarenergy = $hour['solarenergy'];
+
+/*         echo "datetimeEpoch: " . gettype($datetimeEpoch) . "\n";
+        echo "temp: " . gettype($temp) . "\n";
+        echo "humidity: " . gettype($humidity) . "\n";
+        echo "precip: " . gettype($precip) . "\n";
+        echo "pressure: " . gettype($pressure) . "\n";
+        echo "windspeed: " . gettype($windspeed) . "\n";
+        echo "visibility: " . gettype($visibility) . "\n";
+        echo "cloudcover: " . gettype($cloudcover) . "\n";
+        echo "solarenergy: " . gettype($solarenergy) . "\n";
+        echo "sunrise: " . gettype($sunrise) . "\n"; */
+
+        //Insert hourly Weather Variables of current day into one new entry in Database
+        $stmt = $conn->prepare("INSERT INTO weather_states (datetimeEpoch, temp, humidity, precip, pressure, windspeed, visibility, cloudcover, solarenergy, sunrise) VALUES (:datetimeEpoch, :temp, :humidity, :precip, :pressure, :windspeed, :visibility, :cloudcover, :solarenergy, :sunrise)");
+        $stmt->bindParam(':datetimeEpoch', $datetimeEpoch);
+        $stmt->bindParam(':temp', $temp);
+        $stmt->bindParam(':humidity', $humidity);
+        $stmt->bindParam(':precip', $precip);
+        $stmt->bindParam(':pressure', $pressure);
+        $stmt->bindParam(':windspeed', $windspeed);
+        $stmt->bindParam(':visibility', $visibility);
+        $stmt->bindParam(':cloudcover', $cloudcover);
+        $stmt->bindParam(':solarenergy', $solarenergy);
+
+        $stmt->bindParam(':sunrise', $sunrise);
+
         $stmt->execute();
+        echo "New entry with datetimeEpoch: " .$datetimeEpoch . " created successfully\n";
     }
-    echo "New records created successfully\n";
+
+    // Commit the transaction
+    $conn->commit();
 } catch(PDOException $e) {
+    // Roll back the transaction if something failed
+    $conn->rollBack();
     echo "Error: " . $e->getMessage() . "\n";
 }
 
 //-------------Delete all weather states older than a month-------------
 try {
-    $stmt = $conn->prepare("DELETE FROM weather_states WHERE date_time < DATE_SUB(NOW(), INTERVAL 1 MONTH)");
+    $stmt = $conn->prepare("DELETE FROM weather_states WHERE FROM_UNIXTIME(datetimeEpoch) < DATE_SUB(NOW(), INTERVAL 1 MONTH)");
     $stmt->execute();
-    echo "Old records deleted successfully\n";
+    echo "Old entries deleted successfully\n";
 } catch(PDOException $e) {
     echo "Error: " . $e->getMessage() . "\n";
 }
