@@ -1,47 +1,67 @@
 //-------------------Functions-------------------
-function displayDataset(unit, dta, datasetName, container){ //canvasContainer should be id of container, data should be object with date_time as keys, titleString should be string
+function displayDataset(unit, dta, datasetName, sr, container){ //canvasContainer should be id of container, data should be object with date_time as keys, titleString should be string
   //---------create box----------
   const ct = document.createElement('div');
   ct.className = 'canvas-container';
 
   const title = document.createElement('h3');
-  title.textContent = datasetName + ' over time';
-
+  title.textContent = datasetName + '[' + unit + '] over time';
   ct.appendChild(title);
 
   const canvas = document.createElement('canvas');
-
   ct.appendChild(canvas);
 
   const ctx = canvas.getContext('2d');
 
   //append box to container
   container.appendChild(ct);
+  
   //----------create chart----------
 
   //get labels and data from argument 'dta'
-  const labels = Object.keys(dta);
+  const originalLabels = Object.keys(dta);
+  const labels = originalLabels.map((label, index) => index % 4 === 0 ? label : '');
+
   const data = Object.values(dta);
+
+  //create an object for the annotations (sunset from array 'sr')
+  let annots = {};
+
+  console.log('sr:', sr);
+  //add a line for each sunrise time
+  for (let i = 0; i < sr.length; i++) {
+    annots['line' + (i + 1)] = {
+      type: 'line',
+      mode: 'vertical',
+      value: sr[i],
+      borderColor: 'rgb(255, 255, 0)', 
+      borderWidth: 4
+    };
+  }
 
   const chart = new Chart(ctx, {
     type: 'line',
     data: {
       labels: labels,
-      datasets: [{
-        data: data,
-        borderColor: 'rgb(25, 50, 100)',
-        borderWidth: 1
-      }]
+      datasets: [
+        {
+          data: data,
+          borderColor: 'rgb(25, 50, 100)',
+          borderWidth: 2
+        }
+      ]
     },
     options: {
+      plugins: {
+        legend: { display: false },
+        annotation: { annotations: annots }
+      },
       scales: {
-        y: {
-          beginAtZero: true
-        }
+        x: { ticks: { autoSkip: false } },
+        y: { beginAtZero: true, title: { display: true, text: unit } }
       }
     }
   });
-
 }
 
 //-------------------Async Functions-------------------
@@ -88,15 +108,23 @@ async function main(timespan) {
     return false;
   }
 
+  //seperate dataset 'sunrise' from rest of data
+  const sunrise = data['data']['sunrise'];
+  delete data['data']['sunrise'];
+  //concatenate sunrise datetime values
+  const sunriseDatetimes = [];
+  for (let [date, time] of Object.entries(sunrise)) {
+    let datetimeString = date + 'T' + time;
+    let datetime = new Date(datetimeString);
+    sunriseDatetimes.push(datetime);
+  }
+
   //get array of datasetNames
   const keys = Object.keys(data['data']);
 
   for (let i = 0; i < keys.length; i++) {
     //get unit for datasetName
-    console.log('Data in main():', data['units']);
-    console.log(keys[i]);
     ut = data['units'][keys[i]];
-    console.log('ut:', ut);
 
     //get dataset for datasetName
     ds = data['data'][keys[i]];
@@ -104,14 +132,14 @@ async function main(timespan) {
     //get datasetName
     dsName = keys[i];
 
-    displayDataset(ut, ds, dsName, chartContainer);
+    displayDataset(ut, ds, dsName, sunriseDatetimes, chartContainer);
   }
 
   return true;
 }
 
 //-------------------Main Code/Eventlisteners-------------------
-document.addEventListener('DOMContentLoaded', (event) => {
+document.addEventListener('DOMContentLoaded', () => {
   console.log('DOM fully loaded and parsed');
   btnToday = document.getElementById('btnToday');
   btn1Week = document.getElementById('btn1w');
