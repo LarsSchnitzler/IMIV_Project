@@ -27,7 +27,6 @@ function displayDataset(unit, dta, datasetName, sr, container){ //canvasContaine
   //create an object for the annotations (sunset from array 'sr')
   let annots = {};
 
-  console.log('sr:', sr);
   //add a line for each sunrise time
   for (let i = 0; i < sr.length; i++) {
     annots['line' + (i + 1)] = {
