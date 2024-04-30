@@ -56,7 +56,7 @@ function displayDataset(unit, dta, datasetName, sr, container){ //canvasContaine
         annotation: { annotations: annots }
       },
       scales: {
-        x: { ticks: { autoSkip: false } },
+        x: { ticks: { autoSkip: false, maxRotation: 90, minRotation: 90  } },
         y: { beginAtZero: true, title: { display: true, text: unit } }
       }
     }
@@ -113,9 +113,8 @@ async function main(timespan) {
   //concatenate sunrise datetime values
   const sunriseDatetimes = [];
   for (let [date, time] of Object.entries(sunrise)) {
-    let datetimeString = date + 'T' + time;
-    let datetime = new Date(datetimeString);
-    sunriseDatetimes.push(datetime);
+    let datetimeString = date + ' ' + time.substring(0,2) + ':00:00';
+    sunriseDatetimes.push(datetimeString);
   }
 
   //get array of datasetNames
