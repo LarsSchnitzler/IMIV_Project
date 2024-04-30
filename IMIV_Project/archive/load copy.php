@@ -1,5 +1,5 @@
 <?php
-//---------------check wether file has been executed in the last 23h---------------
+//---------------check wether 'password' is correct (url parameter)---------------
 $lastExecFile = '../private/last_execution.txt';
 
 if (file_exists($lastExecFile)) {

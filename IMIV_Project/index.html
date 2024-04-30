@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wetter_Verlauf_Chur</title>
+    <link rel="stylesheet" href="./css/index.css">
+    <script src="https://cdn.jsdelivr.net/npm/moment.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="./js/index.js"></script>
+</head>
+<body>
+    <header>
+        <h1>Wetter History Chur</h1>
+    </header>
+
+    <main>
+        <div class="button-container">
+            <div id="btnToday" class="button">
+                <button>today</button>
+            </div>
+            <div id="btn1w" class="button">
+                <button>last Week</button>
+            </div>
+            <div id="btn2w" class="button">
+                <button>last two Weeks</button>
+            </div>
+        </div>
+        
+        <p id="siteDescription">
+            This WeatherPage is a student exercise, created using PHP, the visualcrossing - API, JavaScript, and CSS. It provides a weather history for Chur.
+        </p>
+
+        <div id="chart-container">
+        </div>
+    </main>
+
+    <footer>
+        <p>© Interaktive Medien IV 2024</p>
+        <p>by Lars Schnitzler</p>
+    </footer>
+</body>
+</html>
