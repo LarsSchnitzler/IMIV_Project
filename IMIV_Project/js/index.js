@@ -46,14 +46,16 @@ function displayDataset(unit, dta, datasetName, sr, container){ //canvasContaine
         {
           data: data,
           borderColor: 'rgb(25, 50, 100)',
-          borderWidth: 2
+          borderWidth: 2,
+          tension: 0.25,
+          pointRadius: 0
         }
       ]
     },
     options: {
       plugins: {
         legend: { display: false },
-        annotation: { annotations: annots }
+        annotation: { annotations: annots}
       },
       scales: {
         x: { ticks: { autoSkip: false, maxRotation: 90, minRotation: 90  } },
