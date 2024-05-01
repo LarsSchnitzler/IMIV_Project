@@ -1,35 +1,27 @@
 <?php
+//will stay in unixtimecode for all serverside actions. converting to datetime-format when making and sending json data to client.
 require_once 'config.php';
-
 header('Content-Type: application/json');
 
 //----------------------------------Functions----------------------------------
-function getDays($d, $dback) {
-    $da = [];
-    $da[] = date('Y-m-d', strtotime($d));
-    for($i = 1; $i <= $dback; $i++) {
-        $da[] = date('Y-m-d', strtotime($d . ' - ' . $i . ' days'));
+function get_startEnd_unixtime() {
+    //---------Read out http-parameter 'day' and 'daysBack'---------------
+    if(isset($_GET['day'])) {
+        $day = $_GET['day'];
+    } else {
+        $day = date('Y-m-d');
     }
-    return $da;
-}
 
-function weather_states_get_timePeriod($ws, $d, $dback) {
-    try {
-        $days = getDays($d, $dback);
-        $ws_tp = [];
-
-        foreach ($days as $day) {
-            foreach($ws as $w) {
-                if(date('Y-m-d', $w['datetimeEpoch']) == $day) {
-                    $ws_tp[] = $w;
-                }
-            }
-        }
-        return $ws_tp;
-    } catch(Exception $e) {
-        echo json_encode(["error: " . $e->getMessage()]);
-        return false;
+    if(isset($_GET['daysBack'])) {
+        $daysBack = $_GET['daysBack'];
+    } else {
+        $daysBack = 0;
     }
+    
+    $start = strtotime($day . ' 00:00:00') - 86400 * $daysBack;
+    $end = strtotime($day . ' 23:59:59');
+
+    return array('start' => $start, 'end' => $end);
 }
 
 function weather_states_separate($ws_tp) {
@@ -93,7 +85,7 @@ function weather_states_separate($ws_tp) {
 
         // go through every 24th element of $ws_tp and put value of 'sunrise' as value of new associative array. transform 'datetimeEpoch' to 'datetime', subtract the time of day, so that its only day. then put that as key. 
         $sunrise = [];
-        for($i = 0; $i < count($ws_tp); $i+=24){
+        for($i = 0; $i < count($ws_tp); $i+=23){
             $sunrise[$ws_tp[$i]['datetimeEpoch']] = $ws_tp[$i]['sunrise'];
         }
         foreach($sunrise as $key => $value) {
@@ -117,10 +109,13 @@ try {
     echo json_encode(['error' => $e->getMessage()]);
 }
 
-//----------------Select all Weather States and Units from Database-----------------
+//----------------Select Weather States (for given days -> by GET Params) and Units from Database-----------------
 try {
-    // Prepare and execute the weatehr-SQL statement
-    $stmt = $conn->prepare("SELECT * FROM weather_states");
+    $s = get_startEnd_unixtime()['start'];
+    $e = get_startEnd_unixtime()['end'];
+    
+    // Prepare and execute the weather-SQL statement
+    $stmt = $conn->prepare("SELECT * FROM weather_states WHERE datetimeEpoch >= " . $s . " AND datetimeEpoch <= " . $e . ";");
     $stmt->execute();
     $weather_states = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch(PDOException $e) {
@@ -137,25 +132,10 @@ try {
     echo json_encode(["error: " . $e->getMessage()]);
 }
 
-//-----------------------Read out http-parameter 'day' and 'daysBack'-----------------------------
-if(isset($_GET['day'])) {
-    $day = $_GET['day'];
-} else {
-    $day = date('Y-m-d');
-}
-
-if(isset($_GET['daysBack'])) {
-    $daysBack = $_GET['daysBack'];
-} else {
-    $daysBack = 0;
-}
-
-//-------------------Separate Weather States into Weather Variables for given day-----------------
-$weatherVariables_tp_data = weather_states_get_timePeriod($weather_states, $day, $daysBack);
-$weatherVariables_tp_s_data = weather_states_separate($weatherVariables_tp_data);
+//-------------------Separate Weather States into Weather Variables-----------------
+$weatherVariables_tp_s_data = weather_states_separate($weather_states);
 
 //-----------------------------------Output----------------------------------------
-
 $output = ['data' => $weatherVariables_tp_s_data, 'units' => $units];
 echo json_encode($output);
 
