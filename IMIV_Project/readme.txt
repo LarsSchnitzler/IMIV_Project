@@ -7,9 +7,14 @@ und damit die DB - Anfragen nicht zu minimieren, bin ich mir nicht ganz sicher, 
 Von der Komplexität des Designs oder der API habe ich mir offen gesagt keine extra-Mühe gemacht,
 weil ich glaube dass prinzipiell nichts neues gelernt werden würde. 
 Meine Haltung war einfach sauber ETL / unload mit einer simplen, minimal interaktiven Darstellung im Frontend zu machen, 
-und dazu trugen besonders schwer zu verstehende Grunddaten der API oder besonders aufwändige 
-Darstellung nicht bei.
+und dazu würden besonders schwer zu verstehende Grunddaten der API oder besonders aufwändige 
+Darstellung nicht beitragen.
 
 Figma Prototyp
 
 Abschlusspräsentation
+
+UX Coaching:
+Zeit: bloss Stundenangaben, 
+Schrift grösser, 
+Responsiveness: Wenns sehr klein wird, soll Graph breiter werden -> horiz. scrolling
