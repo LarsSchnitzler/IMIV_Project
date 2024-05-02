@@ -30,56 +30,56 @@ function weather_states_separate($ws_tp) {
         $temp = array_column($ws_tp, 'temp', 'datetimeEpoch');
         $new_temp = [];
         foreach($temp as $key => $value) {
-            $new_temp[date('Y-m-d H:i:s', $key)] = $value;
+            $new_temp[date('Y-m-d H:i', $key)] = $value;
         }
         $temp = $new_temp;
 
         $humidity = array_column($ws_tp, 'humidity', 'datetimeEpoch');
         $new_humidity = [];
         foreach($humidity as $key => $value) {
-            $new_humidity[date('Y-m-d H:i:s', $key)] = $value;
+            $new_humidity[date('Y-m-d H:i', $key)] = $value;
         }
         $humidity = $new_humidity;
 
         $precipitation = array_column($ws_tp, 'precip', 'datetimeEpoch');
         $new_precipitation = [];
         foreach($precipitation as $key => $value) {
-            $new_precipitation[date('Y-m-d H:i:s', $key)] = $value;
+            $new_precipitation[date('Y-m-d H:i', $key)] = $value;
         }
         $precipitation = $new_precipitation;
 
         $pressure = array_column($ws_tp, 'pressure', 'datetimeEpoch');
         $new_pressure = [];
         foreach($pressure as $key => $value) {
-            $new_pressure[date('Y-m-d H:i:s', $key)] = $value;
+            $new_pressure[date('Y-m-d H:i', $key)] = $value;
         }
         $pressure = $new_pressure;
 
         $windspeed = array_column($ws_tp, 'windspeed', 'datetimeEpoch');
         $new_windspeed = [];
         foreach($windspeed as $key => $value) {
-            $new_windspeed[date('Y-m-d H:i:s', $key)] = $value;
+            $new_windspeed[date('Y-m-d H:i', $key)] = $value;
         }
         $windspeed = $new_windspeed;
 
         $visibility = array_column($ws_tp, 'visibility', 'datetimeEpoch');
         $new_visibility = [];
         foreach($visibility as $key => $value) {
-            $new_visibility[date('Y-m-d H:i:s', $key)] = $value;
+            $new_visibility[date('Y-m-d H:i', $key)] = $value;
         }
         $visibility = $new_visibility;
 
         $cloud_cover = array_column($ws_tp, 'cloudcover', 'datetimeEpoch');
         $new_cloud_cover = [];
         foreach($cloud_cover as $key => $value) {
-            $new_cloud_cover[date('Y-m-d H:i:s', $key)] = $value;
+            $new_cloud_cover[date('Y-m-d H:i', $key)] = $value;
         }
         $cloud_cover = $new_cloud_cover;
 
         $solarenergy = array_column($ws_tp, 'solarenergy', 'datetimeEpoch');
         $new_solarenergy = [];
         foreach($solarenergy as $key => $value) {
-            $new_solarenergy[date('Y-m-d H:i:s', $key)] = $value;
+            $new_solarenergy[date('Y-m-d H:i', $key)] = $value;
         }
         $solarenergy = $new_solarenergy;
 

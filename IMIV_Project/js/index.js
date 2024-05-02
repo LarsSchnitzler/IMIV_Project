@@ -1,5 +1,27 @@
 //-------------------Functions-------------------
-function displayDataset(unit, dta, datasetName, sr, container){ //canvasContainer should be id of container, data should be object with date_time as keys, titleString should be string
+function getStory(dsN){
+  if (dsN === 'temperature') {
+      return "Temperature is the average kinetic energy of the molecules in an environment. It influences the rate of chemical reactions, and governs physical properties of materials like density, solubility, and phase transitions.";
+  } else if (dsN === 'humidity') {
+      return "Humidity is the amount of water vapor in the air. It's usually expressed as a percentage. High humidity can make hot temperatures feel hotter, while low humidity can make cold temperatures feel colder.";
+  } else if (dsN === 'precipitation') {
+      return "Precipitation refers to any water that falls from the sky, including rain, snow, sleet, and hail. The release of water from the atmosphere in the form of rain, sleet, snow, or hail. It's a crucial part of the water cycle, and affects soil erosion, water supply, and the life cycles of plants and animals.";
+  } else if (dsN === 'pressure') {
+      return "Pressure Also known as atmospheric pressure, this is the force exerted by the weight of the air above a given point. Hot air is less dense and therefore exerts less Pressure.";
+  } else if (dsN === 'windspeed') {
+      return "Wind speed can affect outdoor activities and can cause damage if it's too high.";
+  } else if (dsN === 'visibility') {
+      return "The maximum distance at which objects can be clearly discerned. It's affected by a lot of factors like fog, dust, and air pollution, and is important for activities like driving and aviation.";
+  } else if (dsN === 'cloudcover') {
+      return "The fraction of the sky obscured by clouds. It affects the albedo of the Earth and plays a role in the planet's energy balance.";
+  } else if (dsN === 'solarenergy') {
+      return "Closely related to that should be the measure of solar energy that reaches the ground. Its a measurement of Power per ground area. Interestingly, you can sometimes observe temperature going down while solar energy is going up. This could be due to Cloud Cover, Athmospheric Conditions, Seasonal Change in the angle of the sun, or most likely Heat Storage. The Earth's surface can store heat and release it over time. So, a decrease in solar energy might not immediately lead to a decrease in temperature, especially if the previous days were sunny and warm.";
+  } else {
+      return "No information available for this dataset.";
+  }
+}
+
+function displayDataset(unit, dta, datasetName, sr, container, stry){ //canvasContainer should be id of container, data should be object with date_time as keys, titleString should be string
   //---------create box----------
   const ct = document.createElement('div');
   ct.className = 'canvas-container';
@@ -10,6 +32,10 @@ function displayDataset(unit, dta, datasetName, sr, container){ //canvasContaine
 
   const canvas = document.createElement('canvas');
   ct.appendChild(canvas);
+
+  const text = document.createElement('p');
+  text.textContent = stry;
+  ct.appendChild(text);
 
   const ctx = canvas.getContext('2d');
 
@@ -25,16 +51,17 @@ function displayDataset(unit, dta, datasetName, sr, container){ //canvasContaine
   const data = Object.values(dta);
 
   //create an object for the annotations (sunset from array 'sr')
-  let annots = {};
+  let annots = [];
 
   //add a line for each sunrise time
   for (let i = 0; i < sr.length; i++) {
     annots['line' + (i + 1)] = {
       type: 'line',
       mode: 'vertical',
+      scaleID: 'x',
       value: sr[i],
       borderColor: 'rgb(255, 255, 0)', 
-      borderWidth: 4
+      borderWidth: 2
     };
   }
 
@@ -124,15 +151,18 @@ async function main(timespan) {
 
   for (let i = 0; i < keys.length; i++) {
     //get unit for datasetName
-    ut = data['units'][keys[i]];
+    const ut = data['units'][keys[i]];
 
     //get dataset for datasetName
-    ds = data['data'][keys[i]];
+    const ds = data['data'][keys[i]];
 
     //get datasetName
-    dsName = keys[i];
+    const dsName = keys[i];
 
-    displayDataset(ut, ds, dsName, sunriseDatetimes, chartContainer);
+    //get story
+    const story = getStory(dsName);
+
+    displayDataset(ut, ds, dsName, sunriseDatetimes, chartContainer, story);
   }
 
   return true;
@@ -141,11 +171,15 @@ async function main(timespan) {
 //-------------------Main Code/Eventlisteners-------------------
 document.addEventListener('DOMContentLoaded', () => {
   console.log('DOM fully loaded and parsed');
-  btnToday = document.getElementById('btnToday');
-  btn1Week = document.getElementById('btn1w');
-  btn2Week = document.getElementById('btn2w');
+  let btnToday = document.getElementById('btnToday');
+  let btn1Week = document.getElementById('btn1w');
+  let btn2Week = document.getElementById('btn2w');
 
   main('today');
+
+  var audio = document.getElementById("myAudio");
+  audio.loop = true;
+  audio.play();
 
   btnToday.addEventListener('click', () => {
     main('today');
