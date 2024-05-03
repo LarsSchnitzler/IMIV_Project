@@ -1,21 +1,4 @@
 //-------------------Functions-------------------
-function doMusic(){
-  var audio = document.getElementById("myAudio");
-  audio.playbackRate = 1.5;
-  audio.loop = true;
-  var timeout = null;
-
-  window.addEventListener('scroll', function() {
-    clearTimeout(timeout);
-
-    audio.play();
-
-    timeout = setTimeout(function() {
-      audio.pause();
-    }, 100); 
-  });
-}
-
 function getStory(dsN){
   if (dsN === 'temperature') {
       return "Temperature is the average kinetic energy of the molecules in an environment. It influences the rate of chemical reactions, and governs physical properties of materials like density, solubility, and phase transitions.";
@@ -194,9 +177,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   main('today');
 
-  doMusic();
+  var audio = document.getElementById("myAudio");
+  audio.loop = true;
+  audio.play();
 
-  //buttons
   btnToday.addEventListener('click', () => {
     main('today');
   });

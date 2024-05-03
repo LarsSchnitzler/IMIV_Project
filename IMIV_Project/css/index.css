@@ -21,7 +21,7 @@ body {
 main {
     background: linear-gradient(270deg, red, yellow, green, blue, indigo, violet);
     background-size: 200% 200%;
-    animation: gradient 1.5s ease infinite;
+    animation: gradient 5s ease infinite;
     margin: 0;
 }
 
@@ -57,21 +57,6 @@ p {
     width: 50%;
     margin: 0 auto;
     text-align: center;
-}
-
-#stooopid {
-    position: absolute;
-    left: 100px;
-    width: 200px;
-    height: 200px;
-    background: radial-gradient(circle, red, transparent);
-    border-radius: 50%;
-    font-weight: 900;
-    font-size: 0.8rem;
-}
-
-#stooopid:hover {
-    background: radial-gradient(circle, rgb(187, 0, 255), transparent);
 }
 
 .button-container {
