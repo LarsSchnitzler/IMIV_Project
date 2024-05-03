@@ -177,10 +177,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   main('today');
 
-  var audio = document.getElementById("myAudio");
-  audio.loop = true;
-  audio.play();
-
   btnToday.addEventListener('click', () => {
     main('today');
   });
