@@ -8,18 +8,18 @@ body {
 
 @keyframes gradient {
     0% {
-        background-position: 50% 0%;
+        background-position: 0% 50%;
     }
     50% {
-        background-position: 50% 100%;
+        background-position: 100% 50%;
     }
     100% {
-        background-position: 50% 0%;
+        background-position: 0% 50%;
     }
 }
 
 main {
-    background: linear-gradient(0deg, red, yellow, green, blue, indigo, violet);
+    background: linear-gradient(270deg, red, yellow, green, blue, indigo, violet);
     background-size: 200% 200%;
     animation: gradient 1.5s ease infinite;
     margin: 0;
@@ -134,4 +134,3 @@ footer {
     text-align: center;
     padding: 10px 0;
 }
-
