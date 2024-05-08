@@ -21,7 +21,19 @@ function getStory(dsN){
   }
 }
 
-function displayDataset(unit, dta, datasetName, sr, container, stry){ //canvasContainer should be id of container, data should be object with date_time as keys, titleString should be string
+function reduceLabels(labels, ts) {
+  if (ts === 0) {
+    return labels.map((label, index) => index % 4 === 0 ? label : '');
+  }
+  else if (ts === 6) {
+    return labels.map((label, index) => index % 16 === 0 ? label : '');
+  }
+  else if (ts === 13) {
+    return labels.map((label, index) => index % 32 === 0 ? label : '');
+  }
+}
+
+function displayDataset(unit, dta, datasetName, sr, container, stry, ts){ //canvasContainer should be id of container, data should be object with date_time as keys, titleString should be string
   //---------create box----------
   const ct = document.createElement('div');
   ct.className = 'canvas-container';
@@ -46,7 +58,8 @@ function displayDataset(unit, dta, datasetName, sr, container, stry){ //canvasCo
 
   //get labels and data from argument 'dta'
   const originalLabels = Object.keys(dta);
-  const labels = originalLabels.map((label, index) => index % 4 === 0 ? label : '');
+
+  const labels = reduceLabels(originalLabels, ts);
 
   const data = Object.values(dta);
 
@@ -122,13 +135,13 @@ async function main(timespan) {
   const chartContainer = document.getElementById('chart-container');
   chartContainer.innerHTML = '';
 
-  if (timespan === 'today'){
+  if (timespan === 0){
     data = await fetchData(new Date().toISOString().slice(0,10), 0);
   }
-  else if (timespan === '1week'){
+  else if (timespan === 6){
     data = await fetchData(new Date().toISOString().slice(0,10), 6);
   }
-  else if (timespan === '2week'){
+  else if (timespan === 13){
     data = await fetchData(new Date().toISOString().slice(0,10), 13);
   }
   else {
@@ -162,7 +175,7 @@ async function main(timespan) {
     //get story
     const story = getStory(dsName);
 
-    displayDataset(ut, ds, dsName, sunriseDatetimes, chartContainer, story);
+    displayDataset(ut, ds, dsName, sunriseDatetimes, chartContainer, story, timespan);
   }
 
   return true;
@@ -175,15 +188,15 @@ document.addEventListener('DOMContentLoaded', () => {
   let btn1Week = document.getElementById('btn1w');
   let btn2Week = document.getElementById('btn2w');
 
-  main('today');
+  main(0);
 
   btnToday.addEventListener('click', () => {
-    main('today');
+    main(0);
   });
   btn1Week.addEventListener('click', () => {
-    main('1week');
+    main(6);
   });
   btn2Week.addEventListener('click', () => {
-    main('2week');
+    main(13);
   });
 });
