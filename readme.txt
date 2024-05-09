@@ -1,4 +1,4 @@
-500Zeichen Reflexion:
+500 Zeichen Reflexion:
 
 Dieses kleine Projekt war technisch sehr lehrreich, obwohl php mir bereits etwas bekannt war. 
 Die Aufteilung des API zu DB - Prozesses macht Sinn. 
