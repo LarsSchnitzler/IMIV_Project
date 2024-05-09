@@ -15,7 +15,7 @@ function getStory(dsN){
   } else if (dsN === 'cloudcover') {
       return "The fraction of the sky obscured by clouds. It affects the albedo of the Earth and plays a role in the planet's energy balance.";
   } else if (dsN === 'solarenergy') {
-      return "Closely related to that should be the measure of solar energy that reaches the ground. Its a measurement of Power per ground area. Interestingly, you can sometimes observe temperature going down while solar energy is going up. This could be due to Cloud Cover, Athmospheric Conditions, Seasonal Change in the angle of the sun, or most likely Heat Storage. The Earth's surface can store heat and release it over time. So, a decrease in solar energy might not immediately lead to a decrease in temperature, especially if the previous days were sunny and warm.";
+      return "Closely related to that should be the measure of solar energy. Its a measurement of Power per area. Interestingly, you can sometimes observe temperature going down while solar energy is going up. This could be due to Cloud Cover, Athmospheric Conditions, Seasonal Change in the angle of the sun, or most likely Heat Storage. The Earth's surface can store heat and release it over time. So, a decrease in solar energy might not immediately lead to a decrease in temperature, especially if the previous days were sunny and warm.";
   } else {
       return "No information available for this dataset.";
   }
