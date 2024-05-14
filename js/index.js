@@ -33,7 +33,14 @@ function reduceLabels(labels, ts) {
   }
 }
 
-function displayDataset(unit, dta, datasetName, sr, container, stry, ts){ //canvasContainer should be id of container, data should be object with date_time as keys, titleString should be string
+//takes all time values in unix timestamp format besides length which is an integer. returns an array of integers between 0 and len
+function mapDtArray(arr, max, min, len) {
+  const timespan = max - min;
+  return arr.map(value => (value - min) / timespan * len);
+}
+
+//canvasContainer should be id of container, data should be object with date_time as keys, titleString should be string
+function displayDataset(unit, dta, datasetName, sr, container, stry, ts){ 
   //---------create box----------
   const ct = document.createElement('div');
   ct.className = 'canvas-container';
@@ -66,16 +73,15 @@ function displayDataset(unit, dta, datasetName, sr, container, stry, ts){ //canv
   //create an object for the annotations (sunset from array 'sr')
   let annots = [];
 
-  //add a line for each sunrise time
   for (let i = 0; i < sr.length; i++) {
-    annots['line' + (i + 1)] = {
+    annots.push({
+      drawTime: 'beforeDatasetsDraw',
       type: 'line',
-      mode: 'vertical',
       scaleID: 'x',
       value: sr[i],
-      borderColor: 'rgb(255, 255, 0)', 
-      borderWidth: 2
-    };
+      borderColor: 'rgb(255, 255, 0)',
+      borderWidth: 3,
+    });
   }
 
   const chart = new Chart(ctx, {
@@ -155,7 +161,7 @@ async function main(timespan) {
   //concatenate sunrise datetime values
   const sunriseDatetimes = [];
   for (let [date, time] of Object.entries(sunrise)) {
-    let datetimeString = date + ' ' + time.substring(0,2) + ':00:00';
+    let datetimeString = date + ' ' + time;
     sunriseDatetimes.push(datetimeString);
   }
 
@@ -175,9 +181,25 @@ async function main(timespan) {
     //get story
     const story = getStory(dsName);
 
-    displayDataset(ut, ds, dsName, sunriseDatetimes, chartContainer, story, timespan);
-  }
+    //transform sunriseDatetimes to value between 0 and (data['data'][keys[i]].length)
+    //first transform sunriseDatetimes to unix timestamp
+    sunriseDatetimes.forEach((datetime, index) => {
+      sunriseDatetimes[index] = new Date(datetime).getTime();
+    });
+    //second: get max time value of dataset and min time value of dataset
+    const kys = Object.keys(ds);
+    const firstKey = kys[0];
+    const lastKey = kys[kys.length-1];
+    //transform them into unix timestamp
+    const max = new Date(lastKey).getTime();
+    const min = new Date(firstKey).getTime();
+    //third: get length of dataset
+    const len = Object.keys(ds).length;
+    //Now we can map the sunriseDatetimes to the dataset
+    const srXKoords = mapDtArray(sunriseDatetimes, max, min, len);
 
+    displayDataset(ut, ds, dsName, srXKoords, chartContainer, story, timespan);
+  }
   return true;
 }
 

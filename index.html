@@ -6,11 +6,11 @@
     <title>Weather History Chur</title>
     <link rel="stylesheet" href="./css/index.css">
     <link rel="icon" type="image/svg+xml" href="./img/svg/rainy-outline.svg">
-    <script src="https://cdn.jsdelivr.net/npm/moment.js" defer></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment.js" defer></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation" defer></script>
-    <script src="./js/index.js" defer></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/moment.js" defer></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment.js" defer></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation" defer></script>
+    <script type="text/javascript" src="./js/index.js" defer></script>
 </head>
 <body>
     <header>
@@ -31,7 +31,10 @@
         </div>
         
         <p id="siteDescription">
-            This WeatherPage is a student exercise, created using PHP, the visualcrossing - API, JavaScript, and CSS. It provides a weather history for Chur, Switzerland.
+            This WeatherPage is a student exercise, created using PHP, the visualcrossing - API, JavaScript, and CSS. 
+            It provides a weather history for Chur, Switzerland.
+            <br><br>
+            <span class="bold">The yellow line represents sunrise.</span>
         </p>
 
         <div id="chart-container">
@@ -43,8 +46,5 @@
         <p>by PranOfCingles</p>
     </footer>
 
-    <audio id="myAudio">
-        <source src="./music/Offenbach_CanCan.mp3" type="audio/mpeg">
-    </audio>
 </body>
 </html>

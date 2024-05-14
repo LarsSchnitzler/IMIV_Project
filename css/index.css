@@ -34,6 +34,10 @@ p {
     width: 90%;
 }
 
+.bold {
+    font-weight: 600;
+}
+
 #siteDescription {
     width: 50%;
     margin: 0 auto;
